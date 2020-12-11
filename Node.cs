@@ -3,18 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace HuffmanTest
+namespace HuffmansNode
 {
+    /// <summary>
+    ///  This class describes the construction of the leafs of the tree 
+    /// </summary>
+    /// 
+
     public class Node
     {
-        public char Symbol { get; set; }
-        public int Frequency { get; set; }
         public Node Right { get; set; }
         public Node Left { get; set; }
+        public int Weight { get; set; }
+        public char Symbol { get; set; }
 
-        public List<bool> Traverse(char symbol, List<bool> data)
+        /// <summary>
+        /// Creates the list of encoded data
+        /// </summary>
+        /// <param name="symbol">symbol of the input sequence</param>
+        /// <param name="data">list of the encoded data</param>
+        public List<bool> CreateNodePath(char symbol, List<bool> data)
         {
-            // Leaf
             if (Right == null && Left == null)
             {
                 if (symbol.Equals(this.Symbol))
@@ -37,7 +46,7 @@ namespace HuffmanTest
                     leftPath.AddRange(data);
                     leftPath.Add(false);
 
-                    left = Left.Traverse(symbol, leftPath);
+                    left = Left.CreateNodePath(symbol, leftPath);
                 }
 
                 if (Right != null)
@@ -45,7 +54,7 @@ namespace HuffmanTest
                     List<bool> rightPath = new List<bool>();
                     rightPath.AddRange(data);
                     rightPath.Add(true);
-                    right = Right.Traverse(symbol, rightPath);
+                    right = Right.CreateNodePath(symbol, rightPath);
                 }
 
                 if (left != null)

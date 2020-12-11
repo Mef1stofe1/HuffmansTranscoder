@@ -12,70 +12,71 @@ namespace HuffmansTranscoder
         static void Main(string[] args)
         {
 
-            string filePath = @"C:\Huffman\test.bin";
-            string input = "";
-            string original = "";
-            try
-            {
-                // создаем объект BinaryWriter
-                using (BinaryWriter binaryWriter = new BinaryWriter(File.Open(filePath, FileMode.OpenOrCreate), Encoding.ASCII))
-                {
-                    binaryWriter.Write("huffmans encoder");
-                }
+            HuffmansTree huffmanTree = new HuffmansTree();
+            Transcoder transcoder = new Transcoder();
+            FileIO file = new FileIO();
+            string input = string.Empty;
 
-                using (BinaryReader binaryReader = new BinaryReader(File.Open(filePath, FileMode.Open), Encoding.ASCII))
+            Console.WriteLine("Hello! This is the simple implemantation of Huffmans encoding/decoding alorithm." +
+                " The transcoder supports only the binary files (up to 10 KB) with '.bin' extention." +
+                " In order to get the proper result, please make sure that your file contains the text according to the ASCII character encoding standard. \r\n Select the file to proceed or type 'exit' to quit the program.");
+
+            while (true)
+            {
+                try
                 {
-                    while (binaryReader.PeekChar() > -1)
+                    Console.WriteLine(" \r\nInsert the file path:");
+                    input = Console.ReadLine();
+
+                    if (file.CheckTheFile(input))
                     {
-                        original += binaryReader.ReadString();
+                        
+                        string filePath = input;
+                        string data = file.ReadFromFile(filePath);
+
+
+                        // Build the Huffmans tree
+                        var huffmanRoot = huffmanTree.CreateHuffmansTree(data);
+
+
+                        // Encode
+                        BitArray encodedbits = transcoder.Encode(data, huffmanRoot);
+
+
+                        // Decode
+                        string decoded = transcoder.Decode(encodedbits, huffmanRoot);
+
+                        //Write to file
+                        string fileDirectory = Path.GetDirectoryName(filePath);
+                        file.WriteToFile(fileDirectory + @"\encoded.bin", Transcoder.ToByteArray(encodedbits));
+                        file.WriteToFile(fileDirectory + @"\decoded.bin", decoded);
+
+                        //Show the result
+                        Console.WriteLine();
+                        Console.WriteLine("Result is: \r\n");
+                        Console.WriteLine("Inserted file data:  " + data);
+                        Console.WriteLine();
+
+                        Console.Write("Encoded: ");
+                        foreach (bool bit in encodedbits)
+                        {
+                            Console.Write((bit ? 1 : 0) + "");
+                        }
+
+                        Console.WriteLine();
+                        Console.WriteLine("\r\nDecoded: " + decoded);
+
                     }
                 }
-
-
-
-
-                // создаем объект BinaryReader
-                using (BinaryReader binaryReader = new BinaryReader(File.Open(filePath, FileMode.Open), Encoding.ASCII))
+                catch (Exception ex)
                 {
-
-                    while (binaryReader.PeekChar() > -1)
-                    {
-                        input += binaryReader.ReadString();
-                    }
+                    Console.WriteLine("Error: Unable to encode/decode. Please try to use different file.");
                 }
 
-                HuffmanTree huffmanTree = new HuffmanTree();
-
-
-                // Build the Huffman tree
-                huffmanTree.Build(input);
-
-                // Encode
-                BitArray encoded = huffmanTree.Encode(input);
-
-                // Console.WriteLine("Original: " + original);
-
-                Console.WriteLine("Decoded: " + original);
-
-                Console.WriteLine();
-
-                Console.Write("Encoded: ");
-                foreach (bool bit in encoded)
+                if (input == "exit")
                 {
-                    Console.Write((bit ? 1 : 0) + "");
+                    break;
                 }
-                Console.WriteLine();
-                Console.WriteLine();
-                // Decode
-                string decoded = huffmanTree.Decode(encoded).ToString();
-
-                Console.WriteLine("Decoded: " + decoded);
-
-                Console.ReadLine();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex);
             }
         }
     }
